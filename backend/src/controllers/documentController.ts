@@ -1,19 +1,33 @@
 import type { Request, Response } from "express";
 import {
   createUploadedDocument,
-  getAllDocuments,
-  getDocumentById,
+  getDocumentByIdForOwner,
+  getDocumentsByOwner,
 } from "../services/documentService";
 
-export const uploadDocument = async (req: Request, res: Response) => {
+export const uploadDocument = async (
+  req: Request,
+  res: Response
+) => {
   try {
+    const userId = req.auth?.userId;
+
+    if (!userId) {
+      return res.status(401).json({
+        message: "Authentication required",
+      });
+    }
+
     if (!req.file) {
       return res.status(400).json({
         message: "PDF file is required",
       });
     }
 
-    const document = await createUploadedDocument(req.file);
+    const document = await createUploadedDocument(
+      req.file,
+      userId
+    );
 
     return res.status(201).json({
       id: document._id,
@@ -24,7 +38,7 @@ export const uploadDocument = async (req: Request, res: Response) => {
       textPreview: document.extractedText?.slice(0, 500),
     });
   } catch (error) {
-    console.error("PDF upload error:", error);
+    console.error("Upload document error:", error);
 
     return res.status(500).json({
       message: "Failed to process PDF",
@@ -32,31 +46,55 @@ export const uploadDocument = async (req: Request, res: Response) => {
   }
 };
 
-export const listDocuments = async (_req: Request, res: Response) => {
+export const listDocuments = async (
+  req: Request,
+  res: Response
+) => {
   try {
-    const documents = await getAllDocuments();
+    const userId = req.auth?.userId;
 
-    return res.status(200).json(documents);
+    if (!userId) {
+      return res.status(401).json({
+        message: "Authentication required",
+      });
+    }
+
+    const documents = await getDocumentsByOwner(userId);
+
+    return res.json(documents);
   } catch (error) {
-    console.error("Fetch documents error:", error);
+    console.error("List documents error:", error);
 
     return res.status(500).json({
-      message: "Failed to fetch documents",
+      message: "Failed to load documents",
     });
   }
 };
 
-export const getDocument = async (req: Request, res: Response) => {
+export const getDocument = async (
+  req: Request,
+  res: Response
+) => {
   try {
+    const userId = req.auth?.userId;
     const { id } = req.params;
 
-    if (typeof id !== "string") {
-      return res.status(400).json({
-        message: "Invalid document ID",
+    if (!userId) {
+      return res.status(401).json({
+        message: "Authentication required",
       });
     }
 
-    const document = await getDocumentById(id);
+    if (typeof id !== "string") {
+      return res.status(400).json({
+        message: "Invalid document id",
+      });
+    }
+
+    const document = await getDocumentByIdForOwner(
+      id,
+      userId
+    );
 
     if (!document) {
       return res.status(404).json({
@@ -65,9 +103,11 @@ export const getDocument = async (req: Request, res: Response) => {
     }
 
     return res.json(document);
-  } catch {
-    return res.status(400).json({
-      message: "Invalid document ID",
+  } catch (error) {
+    console.error("Get document error:", error);
+
+    return res.status(500).json({
+      message: "Failed to load document",
     });
   }
 };

@@ -1,23 +1,48 @@
 import express from "express";
 import cors from "cors";
-import documentRoutes from "./routes/documentRoutes";
+import { expressMiddleware } from "@as-integrations/express5";
+
 import authRoutes from "./routes/authRoutes";
+import documentRoutes from "./routes/documentRoutes";
 import ragRoutes from "./routes/ragRoutes";
+import workflowRoutes from "./routes/workflowRoutes";
+import agentRoutes from "./routes/agentRoutes";
+import adminRoutes from "./routes/adminRoutes";
 
-const app = express();
+import {
+  buildGraphQLContext,
+  createApolloServer,
+} from "./graphql/apolloServer";
 
-app.use(cors());
-app.use(express.json());
+export const createApp = async () => {
+  const app = express();
 
-app.get("/api/health", (_req, res) => {
-  res.status(200).json({
-    status: "ok",
-    service: "AI Bureaucracy Navigator API",
+  app.use(cors());
+  app.use(express.json());
+
+  app.get("/api/health", (_req, res) => {
+    res.json({
+      status: "ok",
+      service: "AI Bureaucracy Navigator API",
+    });
   });
-});
 
-app.use("/api/documents", documentRoutes);
-app.use("/api/rag", ragRoutes);
-app.use("/api/auth", authRoutes);
+  app.use("/api/auth", authRoutes);
+  app.use("/api/documents", documentRoutes);
+  app.use("/api/rag", ragRoutes);
+  app.use("/api/workflows", workflowRoutes);
+app.use("/api/agent", agentRoutes);
+app.use("/api/admin", adminRoutes);
 
-export default app;
+  const apolloServer = await createApolloServer();
+
+  app.use(
+    "/graphql",
+    expressMiddleware(apolloServer, {
+      context: async ({ req }) =>
+        buildGraphQLContext(req.headers.authorization),
+    })
+  );
+
+  return app;
+};

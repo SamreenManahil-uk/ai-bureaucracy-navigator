@@ -1,14 +1,12 @@
-import type { UserRole } from "../models/User";
+export {};
 
 declare global {
   namespace Express {
     interface Request {
       auth?: {
         userId: string;
-        role: UserRole;
+        role: "USER" | "ADMIN";
       };
     }
   }
 }
-
-export {};
