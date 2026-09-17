@@ -13,7 +13,9 @@ import {
   buildGraphQLContext,
   createApolloServer,
 } from "./graphql/apolloServer";
+import activityRoutes from "./routes/activityRoutes";
 
+import documentDeleteRoutes from "./routes/documentDeleteRoutes";
 export const createApp = async () => {
   const app = express();
 
@@ -29,10 +31,12 @@ export const createApp = async () => {
 
   app.use("/api/auth", authRoutes);
   app.use("/api/documents", documentRoutes);
+  app.use("/api/documents", documentDeleteRoutes);
   app.use("/api/rag", ragRoutes);
   app.use("/api/workflows", workflowRoutes);
 app.use("/api/agent", agentRoutes);
 app.use("/api/admin", adminRoutes);
+  app.use("/api/history", activityRoutes);
 
   const apolloServer = await createApolloServer();
 
