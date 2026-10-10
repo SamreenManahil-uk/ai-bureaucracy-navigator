@@ -1,5 +1,5 @@
-const API_BASE_URL = "http://localhost:5000/api";
-const GRAPHQL_URL = "http://localhost:5000/graphql";
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api");
+const GRAPHQL_URL = (import.meta.env.VITE_GRAPHQL_URL || "http://localhost:5000/graphql");
 
 export type DashboardDocument = {
   _id: string;

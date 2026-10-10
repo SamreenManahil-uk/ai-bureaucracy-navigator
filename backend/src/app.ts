@@ -19,7 +19,21 @@ import documentDeleteRoutes from "./routes/documentDeleteRoutes";
 export const createApp = async () => {
   const app = express();
 
-  app.use(cors());
+  const allowedOrigins = (process.env.FRONTEND_URL || "http://localhost:5173")
+    .split(",")
+    .map((origin) => origin.trim().replace(/\/+$/, ""));
+
+  app.use(
+    cors({
+      origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin.replace(/\/+$/, ""))) {
+          callback(null, true);
+        } else {
+          callback(new Error("Origin not allowed by CORS"));
+        }
+      },
+    })
+  );
   app.use(express.json());
 
   app.get("/api/health", (_req, res) => {

@@ -44,7 +44,7 @@ ${context}
 Give a concise answer.
 `.trim();
 
-  const response = await fetch("http://127.0.0.1:11434/api/generate", {
+  const response = await fetch(`${(process.env.OLLAMA_BASE_URL || "http://127.0.0.1:11434").replace(/\/+$/, "")}/api/generate`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

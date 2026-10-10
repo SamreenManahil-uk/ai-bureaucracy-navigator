@@ -73,7 +73,7 @@ const callOllama = async (
   messages: OllamaMessage[]
 ): Promise<OllamaChatResponse> => {
   const response = await fetch(
-    "http://127.0.0.1:11434/api/chat",
+    `${(process.env.OLLAMA_BASE_URL || "http://127.0.0.1:11434").replace(/\/+$/, "")}/api/chat`,
     {
       method: "POST",
       headers: {

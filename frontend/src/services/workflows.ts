@@ -1,4 +1,4 @@
-const GRAPHQL_URL = "http://localhost:5000/graphql";
+const GRAPHQL_URL = (import.meta.env.VITE_GRAPHQL_URL || "http://localhost:5000/graphql");
 
 export type WorkflowStatus =
   | "draft"

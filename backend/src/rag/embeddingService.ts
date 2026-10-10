@@ -1,7 +1,7 @@
 export const createEmbedding = async (
   text: string
 ): Promise<number[]> => {
-  const response = await fetch("http://127.0.0.1:11434/api/embed", {
+  const response = await fetch(`${(process.env.OLLAMA_BASE_URL || "http://127.0.0.1:11434").replace(/\/+$/, "")}/api/embed`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
